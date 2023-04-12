@@ -1,0 +1,41 @@
+name: LISTING USERS,TEAM OR REPO DETAILS
+
+on:
+  workflow_dispatch:
+   inputs:
+    repo-name:
+        description: 'Repository Name'
+        required: false
+    select-choice:
+        type: choice
+        description: 'Select an option 1.users in repo 2.Teams in REPO. 3.REPOs in ORG'
+        required: true
+        default: 'push'
+        options: 
+        - user
+        - team
+        - repo
+        
+jobs:
+  list-details:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: List Details
+      run: |
+            org="${{ secrets.ORGANIZATION }}"
+            repo="${{ github.event.inputs.repo-name }}"
+            token="${{ secrets.ORG_ADMIN_TOKEN }}"
+            
+            if [[ ${{ github.event.inputs.select-choice }} == "user" ]]; then
+             curl -H "Authorization: token $token" https://api.github.com/repos/$org/$repo/collaborators 
+             
+            elif [[ ${{ github.event.inputs.select-choice }} == "team" ]]; then
+            curl -H "Authorization: token $token" https://api.github.com/repos/$org/$repo/teams
+            
+            else
+            curl -H "Authorization: token $token" https://api.github.com/orgs/$org/repos
+            fi       
